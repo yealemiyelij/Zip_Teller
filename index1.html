@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Zip Code Tell All Project</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDaPZ5HfKbDDaPol5zPsE7-zvfUopTe41I&libraries=places"></script>
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDaPZ5HfKbDDaPol5zPsE7-zvfUopTe41I"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/4.5.0/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js"></script>
+    <script src="assets/js/data/nc_places.txt"></script>
+    <script src="assets/js/demographics.js"></script>
+    <script src="assets/js/map.js"></script>
+
+</head>
+<style>
+    body {
+
+        /*background-image: url('images/picture.png');*/
+        /* background-image: url('images/cityofcharlotte.jpeg'); */
+        background-repeat: no-repeat;
+        /* background-image: url('images/usmap.jpeg'); */
+    }
+
+    h3 {
+        font-size: 15px;
+        font-style: underline;
+    }
+
+    h4 {
+        /* color: white; */
+        font-size: 20px;
+    }
+
+    #project1 {
+        /* background-image: url('images/cityofcharlotte.jpeg'); */
+        /* height: 70%; */
+        font-style: bold;
+        font-family: Cambria, Cochin, Georgia, Times, Times New Roman, serif;
+    }
+
+    #map-canvas {
+        height: 300px;
+        width: 100%;
+        margin: 0px;
+        padding: 0px;
+        /* border-top: 50px solid #fff;
+        border-bottom: 20px solid #fff; */
+    }
+
+    #graph-canvas {
+        height: 300px;
+        width: 100%;
+        border-left: solid 1px #BEBDBB;
+        margin: 0px;
+        padding: 0px;
+        border-top: 50px solid #fff;
+        border-bottom: 20px solid #fff;
+    }
+
+    .carousel slide {
+        text-align: center;
+        height: 300px;
+        color: #8a6d3b;
+        background-color: #fcf8e3;
+        border-color: #faebcc;
+    }
+
+    .carousel slide h1 {
+        font-size: 60px;
+        padding-top: -10px;
+        color: white;
+    }
+
+    p1,
+    p2,
+    p3 {
+        font-size: 14px;
+    }
+
+    #zip-finder {
+        background-color: #8a6d3b;
+    }
+
+    .panel panel-warning {
+        background-color: #8a6d3b;
+        text-align: center;
+    }
+
+    #navigation {
+        display: inline-block;
+        justify-content: space-around;
+        text-align: center;
+    }
+
+    #navigation ul {
+        list-style: none;
+        margin: 0 2px;
+        padding: 0;
+        display: flex;
+        justify-content: space-around;
+    }
+
+    #footer-space {
+        text-align: center;
+        display: inline-block;
+        background-color: lightblue;
+        max-height: 70px;
+        height: auto;
+        font-family: Cambria, Cochin, Georgia, Times, Times New Roman, serif;
+    }
+    /* .header {
+        position: relative;
+        display: table;
+        width: 100%;
+        height: 100%;
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+    } */
+
+    #chartSpot {
+        position: relative;
+        height: 90%;
+        width: auto;
+    }
+
+    .text-vertical-center {
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    @keyframes slidy {
+        0% {
+            left: 0%;
+        }
+        20% {
+            left: 0%;
+        }
+        25% {
+            left: -100%;
+        }
+        45% {
+            left: -100%;
+        }
+        50% {
+            left: -200%;
+        }
+        70% {
+            left: -200%;
+        }
+        75% {
+            left: -300%;
+        }
+        95% {
+            left: -300%;
+        }
+        100% {
+            left: -400%;
+        }
+    }
+
+    header {
+        margin: 0;
+    }
+
+    div#slider {
+        overflow: hidden;
+    }
+
+    div#slider figure img {
+        width: 20%;
+        float: left;
+        height: 350px;
+    }
+
+    div#slider figure {
+        position: relative;
+        width: 500%;
+        margin: 0;
+        left: 0;
+        text-align: left;
+        font-size: 0;
+        animation: 30s slidy infinite;
+        height: 200px;
+    }
+</style>
+
+<body>
+    <header class="carousel slide" id="project1">
+        <ol class="carousel-indicators">
+            <li data-target="#myCarousel" data-slide-to="0"></li>
+            <li data-target="#myCarousel" data-slide-to="1"></li>
+            <li data-target="#myCarousel" data-slide-to="2"></li>
+            <li data-target="#myCarousel" data-slide-to="3"></li>
+            <li data-target="#myCarousel" data-slide-to="4"></li>
+        </ol>
+
+
+        <div id="slider">
+            <figure>
+                <img src='images/califonia.jpeg' alt>
+                <div class="carousel-caption">
+                    <h1> Zip Code Tell All!</h1>
+                    <h4><em>Explore locations and get statistical data using ZipCode</em></h4>
+                </div>
+                <img src='images/charlotte.jpeg' alt>
+                <div class="carousel-caption">
+                    <h1> Zip Code Tell All!</h1>
+                    <h4> <em>Explore locations and get statistical data using ZipCode</em></h4>
+                </div>
+                <img src='images/atlanta.jpeg' alt>
+                <div class="carousel-caption">
+                    <h1> Zip Code Tell All!</h1>
+                    <h4> <em>Explore locations and get statistical data using ZipCode</em></h4>
+                </div>
+                <img src='images/hawai.jpeg' alt>
+                <div class="carousel-caption">
+                    <h1> Zip Code Tell All!</h1>
+                    <h4> <em>Explore locations and get statistical data using ZipCode</em></h4>
+                </div>
+                <img src='images/asheville.jpeg' alt>
+                <div class="carousel-caption">
+                    <h1> Zip Code Tell All!</h1>
+                    <h4> <em>Explore locations and get statistical data using ZipCode</em></h4>
+                </div>
+            </figure>
+        </div>
+    </header>
+    <div class="container">
+        <div class="panel-placer">
+            <div class="form-group">
+                <label for="zip_code">Zip Code</label>
+                <input type="text" id="zipCode" placeholder="Example: 28202">&nbsp
+                <button type="text" id="zip-finder" class="btn btn-default">Find</button>
+            </div>
+
+            <div class="responsive-table">
+                <div class="col-6 col-md-6">
+                    <h3> <strong>Map Information</strong></h3>
+                    <p2><strong>Note:</strong>The Map displays different informations so take a look on the coned spots</p2>
+                    <div id="map-canvas">
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <h3><strong>Check the Box</strong></h3>
+                    <form action="check-box-page" id="form-input">
+                        <input type="checkbox" name="medical-center" value="hospital" id="hospital_checked">&nbspHospital<br>
+                        <input type="checkbox" name="educational-center" value="school" id="school_checked">&nbsp School<br>
+                        <input type="checkbox" name="entertainment-center" value="Entertainment" id="entertainment_checked">&nbspEntertainment<br>
+                        <!-- <input type="checkbox" name="crime-data" value="criminality" id="crime_checked">&nbsp Crime Status<br> -->
+                        <input type="checkbox" name="sport-activities" value="Playing parks" id="park_checked">&nbsp Parks<br>
+                    </form>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="invisible" id="gatheredDataBlock">
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#demographics" role="tab" data-toggle="tab">Demographics</a>
+                        </li>
+                        <li class="nav-item">
+                                <a class="nav-link active" href="#weatherForecast" role="tab" data-toggle="tab">Weather Forecast</a>
+                        </li>
+                        <li class="nav-item">
+                                <a class="nav-link active" href="#metrics" role="tab" data-toggle="tab">Metrics</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane fade in active" id="demographics">
+                            <div class="chart-container" style="position: relative; height: 90%; width: auto; " id="chartSpot">
+                                <h3><strong>Demograpic Information</strong></h3>
+                                <canvas id="myChart"></canvas>
+                            </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade in" id="weatherForecast">
+                                <div  class="carousel slide" data-ride="carousel" id="weatherCarousel">
+                                        <div class="carousel-inner" role="listbox" id="weatherItems">
+
+                                        </div>
+                                                                          
+                                        <a class="carousel-control left" href="#weatherCarousel" data-slide="prev">
+                                                <span class="glyphicon glyphicon-chevron-left"></span>
+                                            </a>
+                                            <a class="carousel-control right" href="#weatherCarousel" data-slide="next">
+                                                <span class="glyphicon glyphicon-chevron-right"></span>
+                                            </a>
+                                </div>
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade in" id="metrics">
+
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <footer class="navbar-default navbar-fixed-bottom" id="footer-space">
+        <div class="row">
+            <nav id="navigation">
+                <a href="https://www.google.com/maps/@35.2179575,-80.7602392,15z">GoogleMaps</a> &nbsp
+                <a href="https://www.fbi.gov/">Federal Bureau of Investigation</a> &nbsp
+                <a href="https://www.usa.gov/statistics">US data and Statistics</a> &nbsp
+                <a href="https://www.nc.gov/">State of North Carolina</a> &nbsp
+                <!-- <br> &copy Copyright 2017 Team Eitch
+                <text-align="center">. -->
+            </nav>
+        </div>
+    </footer>
+</body>
+
+</html>
